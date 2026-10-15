@@ -9,6 +9,8 @@ from html.parser import HTMLParser
 import json
 from pathlib import Path
 import re
+import time
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
 
@@ -122,7 +124,7 @@ def faithful_portrait(rows, x, y, size):
 
 def hero(config):
     rows = json.loads((DATA / "portrait.json").read_text(encoding="utf-8"))
-    parts = frame(900, 650, f"{config['name']} — @{config['username']}. Original profile artwork with an animated ASCII introduction.")
+    parts = frame(900, 650, f"{config['name']} - @{config['username']}. Original profile artwork with an animated ASCII introduction.")
     for x, color in [(26, "#ff5f57"), (44, "#febc2e"), (62, "#28c840")]:
         parts.append(f'<circle cx="{x}" cy="25" r="5" fill="{color}"/>')
     parts += [text(85, 30, f"{config['username']} / personal terminal", 12, MUTED),
@@ -217,6 +219,23 @@ def heatmap(data):
     save_svg("contributions.svg", parts)
 
 
+def fetch_calendar(username):
+    request = Request(f"https://github.com/users/{username}/contributions", headers={"User-Agent": "github-profile-art", "Accept": "text/html"})
+    for attempt in range(3):
+        try:
+            with urlopen(request, timeout=30) as response:
+                return response.read().decode("utf-8")
+        except HTTPError as error:
+            if error.code not in (500, 502, 503, 504) or attempt == 2:
+                raise
+        except (URLError, TimeoutError):
+            if attempt == 2:
+                raise
+        delay = (2, 5)[attempt]
+        print(f"Calendar request temporarily failed; retrying in {delay}s", flush=True)
+        time.sleep(delay)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--fetch", action="store_true")
@@ -229,9 +248,7 @@ def main():
         if args.html:
             html = args.html.read_text(encoding="utf-8")
         else:
-            request = Request(f"https://github.com/users/{config['username']}/contributions", headers={"User-Agent": "github-profile-art", "Accept": "text/html"})
-            with urlopen(request, timeout=30) as response:
-                html = response.read().decode("utf-8")
+            html = fetch_calendar(config["username"])
         calendar = CalendarParser()
         calendar.feed(html)
         data = {"username": config["username"], "updated": datetime.now(timezone.utc).date().isoformat(), "days": calendar.days()}
@@ -246,3 +263,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
