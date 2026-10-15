@@ -46,8 +46,35 @@ def main():
             if 0 <= nx < 800 and 0 <= ny < 800 and mask[nx,ny] and pixels[nx,ny] >= 215:
                 mask[nx,ny] = 0
                 queue.append((nx,ny))
-    # The speech balloon is outside the portrait, at the top-right.
-    ImageDraw.Draw(background).rectangle((608, 0, 799, 232), fill=0)
+    # Keep the largest foreground component (the person), removing the separate
+    # speech balloon and background specks without cutting into the hair.
+    seen = bytearray(800 * 800)
+    largest = []
+    for sy in range(800):
+        for sx in range(800):
+            index = sy * 800 + sx
+            if seen[index] or not mask[sx, sy]:
+                continue
+            component = []
+            queue = deque([(sx, sy)])
+            seen[index] = 1
+            while queue:
+                x, y = queue.popleft()
+                component.append((x, y))
+                for nx, ny in ((x-1,y),(x+1,y),(x,y-1),(x,y+1)):
+                    if 0 <= nx < 800 and 0 <= ny < 800:
+                        index = ny * 800 + nx
+                        if not seen[index] and mask[nx, ny]:
+                            seen[index] = 1
+                            queue.append((nx, ny))
+            if len(component) > len(largest):
+                largest = component
+    if len(largest) < 50_000:
+        raise ValueError("Could not isolate avatar subject")
+    background = Image.new("L", image.size, 0)
+    mask = background.load()
+    for x, y in largest:
+        mask[x, y] = 255
     image = ImageOps.autocontrast(image, cutoff=1)
     image = image.filter(ImageFilter.UnsharpMask(radius=1.2, percent=135, threshold=3))
     foreground = Image.new("L", image.size, 0)
