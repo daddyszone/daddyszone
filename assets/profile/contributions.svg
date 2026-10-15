@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="348" viewBox="0 0 900 348" role="img" aria-labelledby="title">
-<title id="title">Decorative all-green calendar for @daddyszone. Colors do not encode activity. Real totals: 19 contributions; 3 active days.</title>
+<title id="title">Decorative all-green calendar for @daddyszone. Colors do not encode activity. Real totals: 21 contributions; 3 active days.</title>
 <style>text{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.reveal{animation:reveal .6s both}@keyframes reveal{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.reveal{animation:none!important}}</style>
 <rect x=".5" y=".5" width="899" height="347" rx="18" fill="#0d1117" stroke="#30363d"/>
 <defs>
@@ -1520,7 +1520,7 @@
 <rect class="active-halo" style="--wave:8.930s" x="842" y="164" width="11" height="11" rx="3" fill="none" stroke="#39d353" stroke-width=".6"/>
 </g>
 <g class="cell-enter" style="--delay:2.080s;--dx:6px;--dy:-45px">
-<rect class="cell-wave" data-date="2026-10-15" style="--wave:9.000s" x="842" y="179" width="11" height="11" rx="3" fill="#238636"><title>2026-10-15: 3 actual contributions; decorative green color</title></rect>
+<rect class="cell-wave" data-date="2026-10-15" style="--wave:9.000s" x="842" y="179" width="11" height="11" rx="3" fill="#238636"><title>2026-10-15: 5 actual contributions; decorative green color</title></rect>
 <rect class="active-halo" style="--wave:9.000s" x="842" y="179" width="11" height="11" rx="3" fill="none" stroke="#39d353" stroke-width=".6"/>
 </g>
 <g clip-path="url(#grid-window)"><rect class="scan" x="58" y="113" width="100" height="111" fill="url(#beam)"/></g>
@@ -1529,7 +1529,7 @@
 <text x="29" y="203" font-size="9" fill="#8b949e" >Fri</text>
 <path d="M30 246H870" stroke="#26303c"/>
 <g class="boot">
-<text x="35" y="278" font-size="25" fill="#a3e635" >19</text>
+<text x="35" y="278" font-size="25" fill="#a3e635" >21</text>
 <text x="35" y="298" font-size="9" fill="#8b949e" >REAL CONTRIBUTIONS</text>
 <text x="262" y="278" font-size="25" fill="#79c0ff" >3</text>
 <text x="262" y="298" font-size="9" fill="#8b949e" >ACTIVE DAYS</text>
