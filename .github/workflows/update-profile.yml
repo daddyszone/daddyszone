@@ -25,12 +25,6 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Install portrait dependencies
-        if: github.event_name != 'schedule'
-        run: python3 -m pip install -r scripts/profile/requirements-portrait.txt
-      - name: Rebuild detailed portrait
-        if: github.event_name != 'schedule'
-        run: python3 scripts/profile/make_portrait.py
       - name: Fetch calendar and generate SVGs
         run: python3 scripts/profile/generate.py --fetch
       - name: Commit updated art

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import base64
 from datetime import date, datetime, timedelta, timezone
 from html import escape
 from html.parser import HTMLParser
@@ -89,49 +88,41 @@ def save_svg(name, parts):
     (ASSETS / name).write_text(value, encoding="utf-8")
 
 
-def portrait_lines(rows, x, y, size):
-    parts = []
+def portrait_lines(portrait, x, y, size):
+    rows = portrait["rows"]
+    tones = portrait["tones"]
     count = len(rows)
-    columns = max(len(row) for row in rows)
     line_height = size / count
-    font_size = size / columns / .602
-    for i, row in enumerate(rows):
-        delay = i * 1.9 / count
-        parts.append(f'<g class="reveal" style="animation-delay:{delay:.3f}s">' + text(x, y+(i+1)*line_height, row, round(font_size, 3), "#d8dee9", f'xml:space="preserve" textLength="{size}" lengthAdjust="spacingAndGlyphs"') + '</g>')
-    return parts
-
-
-def faithful_portrait(rows, x, y, size):
-    """Keep the actual artwork intact; ASCII is only the introductory transition."""
-    original = base64.b64encode((DATA / "avatar-source.png").read_bytes()).decode("ascii")
-    parts = ['''<style>
-      .portrait-original{animation:portrait-resolve 2.8s ease-in-out both}
-      .portrait-ascii{opacity:0;animation:ascii-intro 2.8s ease-in-out both}
-      .portrait-scan{opacity:0;animation:portrait-scan 2.8s ease-in-out both}
-      @keyframes portrait-resolve{0%,28%{opacity:0}100%{opacity:1}}
-      @keyframes ascii-intro{0%,30%{opacity:1}100%{opacity:0}}
-      @keyframes portrait-scan{0%,24%{opacity:0;transform:translateY(0)}35%{opacity:.65}90%{opacity:.5}100%{opacity:0;transform:translateY(var(--portrait-travel))}}
-      @media(prefers-reduced-motion:reduce){.portrait-original{animation:none!important;opacity:1!important}.portrait-ascii,.portrait-scan{display:none!important}}
-    </style>''',
-             '<g class="portrait-ascii">']
-    parts += portrait_lines(rows, x, y, size)
-    parts += ['</g>', f'<defs><clipPath id="portrait-clip"><rect x="{x}" y="{y}" width="{size}" height="{size}" rx="14"/></clipPath></defs>',
-              f'<g clip-path="url(#portrait-clip)"><image class="portrait-original" x="{x}" y="{y}" width="{size}" height="{size}" preserveAspectRatio="xMidYMid meet" href="data:image/png;base64,{original}"/>',
-              f'<rect class="portrait-scan" style="--portrait-travel:{size}px" x="{x}" y="{y}" width="{size}" height="2" fill="#a3e635"/></g>',
-              f'<rect x="{x}" y="{y}" width="{size}" height="{size}" rx="14" fill="none" stroke="#30363d"/>']
+    font_size = line_height * 1.14
+    parts = []
+    for i, (row, tone_row) in enumerate(zip(rows, tones)):
+        if len(row) != portrait["columns"] or len(tone_row) != len(row):
+            raise ValueError("Invalid portrait character grid")
+        spans = []
+        start = 0
+        while start < len(row):
+            end = start + 1
+            while end < len(row) and tone_row[end] == tone_row[start]:
+                end += 1
+            level = int(tone_row[start], 16)
+            shade = round(70 + level / 15 * 185)
+            spans.append(f'<tspan fill="#{shade:02x}{shade:02x}{shade:02x}">{escape(row[start:end])}</tspan>')
+            start = end
+        delay = i * 2.2 / count
+        parts.append(f'<g class="reveal" style="animation-delay:{delay:.3f}s"><text x="{x}" y="{y+(i+1)*line_height:.3f}" font-size="{font_size:.3f}" xml:space="preserve" textLength="{size}" lengthAdjust="spacingAndGlyphs">' + ''.join(spans) + '</text></g>')
     return parts
 
 
 def hero(config):
     rows = json.loads((DATA / "portrait.json").read_text(encoding="utf-8"))
-    parts = frame(900, 650, f"{config['name']} - @{config['username']}. Original profile artwork with an animated ASCII introduction.")
+    parts = frame(900, 650, f"{config['name']} - @{config['username']}. Detailed text-only ASCII portrait and terminal profile.")
     for x, color in [(26, "#ff5f57"), (44, "#febc2e"), (62, "#28c840")]:
         parts.append(f'<circle cx="{x}" cy="25" r="5" fill="{color}"/>')
     parts += [text(85, 30, f"{config['username']} / personal terminal", 12, MUTED),
-              text(864, 30, "v1.2", 11, MUTED, 'text-anchor="end"'),
+              text(864, 30, "v1.3", 11, MUTED, 'text-anchor="end"'),
               '<path d="M1 49H899" stroke="#30363d"/>',
-              text(30, 82, "$ render avatar --original", 12, GREEN)]
-    parts += faithful_portrait(rows, 25, 111, 480)
+              text(30, 82, "$ render avatar.ascii --hi-res", 12, GREEN)]
+    parts += portrait_lines(rows, 25, 111, 480)
     parts += ['<path d="M529 98V600" stroke="#26303c"/>',
               text(552, 163, "$ whoami", 13, GREEN),
               text(552, 211, config["name"].upper(), 27),
@@ -144,8 +135,8 @@ def hero(config):
               '<rect class="reveal" style="animation-delay:1.9s" x="727" y="534" width="8" height="13" fill="#a3e635"/>',
               text(30, 627, "IDENTITY / 01", 10, MUTED), text(865, 627, "ALWAYS A WORK IN PROGRESS", 10, MUTED, 'text-anchor="end"')]
     save_svg("identity.svg", parts)
-    full = frame(800, 800, f"{config['name']}: original profile artwork with ASCII intro")
-    full += faithful_portrait(rows, 24, 20, 752)
+    full = frame(800, 800, f"{config['name']}: detailed text-only ASCII portrait")
+    full += portrait_lines(rows, 24, 20, 752)
     save_svg("avatar.svg", full)
 
 
