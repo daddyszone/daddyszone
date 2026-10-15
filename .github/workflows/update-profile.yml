@@ -5,7 +5,7 @@ on:
     - cron: '17 6 * * *'
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, profile-avatar-detail]
     paths:
       - 'scripts/profile/**'
       - 'data/profile/profile.json'
@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: profile-art
+  group: profile-art-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -25,6 +25,12 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install portrait dependencies
+        if: github.event_name != 'schedule'
+        run: python3 -m pip install -r scripts/profile/requirements-portrait.txt
+      - name: Rebuild detailed portrait
+        if: github.event_name != 'schedule'
+        run: python3 scripts/profile/make_portrait.py
       - name: Fetch calendar and generate SVGs
         run: python3 scripts/profile/generate.py --fetch
       - name: Commit updated art
@@ -32,7 +38,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/profile/identity.svg assets/profile/contributions.svg data/profile/contributions.json
+          git add assets/profile/ data/profile/
           if git diff --cached --quiet; then
             echo 'Profile art is already current.'
           else

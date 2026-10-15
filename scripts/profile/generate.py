@@ -86,29 +86,43 @@ def save_svg(name, parts):
     (ASSETS / name).write_text(value, encoding="utf-8")
 
 
+def portrait_lines(rows, x, y, size):
+    parts = []
+    count = len(rows)
+    columns = max(len(row) for row in rows)
+    line_height = size / count
+    font_size = size / columns / .602
+    for i, row in enumerate(rows):
+        delay = i * 1.9 / count
+        parts.append(f'<g class="reveal" style="animation-delay:{delay:.3f}s">' + text(x, y+(i+1)*line_height, row, round(font_size, 3), "#d8dee9", f'xml:space="preserve" textLength="{size}" lengthAdjust="spacingAndGlyphs"') + '</g>')
+    return parts
+
+
 def hero(config):
-    parts = frame(900, 450, f"{config['name']} — @{config['username']}. Animated ASCII avatar and profile card.")
+    rows = json.loads((DATA / "portrait.json").read_text(encoding="utf-8"))
+    parts = frame(900, 650, f"{config['name']} — @{config['username']}. Detailed animated ASCII avatar and profile card.")
     for x, color in [(26, "#ff5f57"), (44, "#febc2e"), (62, "#28c840")]:
         parts.append(f'<circle cx="{x}" cy="25" r="5" fill="{color}"/>')
     parts += [text(85, 30, f"{config['username']} / personal terminal", 12, MUTED),
-              text(864, 30, "v1.0", 11, MUTED, 'text-anchor="end"'),
+              text(864, 30, "v1.1", 11, MUTED, 'text-anchor="end"'),
               '<path d="M1 49H899" stroke="#30363d"/>',
-              text(30, 82, "$ cat avatar.ascii", 12, GREEN)]
-    rows = json.loads((DATA / "portrait.json").read_text(encoding="utf-8"))
-    for i, row in enumerate(rows):
-        parts.append(f'<g class="reveal" style="animation-delay:{i*.026:.3f}s">' + text(30, 105+i*7.9, row, 7.6, "#c9d1d9", 'xml:space="preserve" textLength="310" lengthAdjust="spacingAndGlyphs"') + '</g>')
-    parts += ['<path d="M375 77V410" stroke="#26303c"/>',
-              text(407, 83, "$ whoami", 13, GREEN),
-              text(407, 132, config["name"].upper(), 32),
-              text(407, 160, "@"+config["username"], 15, MUTED),
-              text(407, 200, "Build. Learn. Repeat.", 19, "#a3e635"),
-              '<path d="M407 222H865" stroke="#26303c"/>']
+              text(30, 82, "$ cat avatar.ascii --detail", 12, GREEN)]
+    parts += portrait_lines(rows, 25, 111, 480)
+    parts += ['<path d="M529 98V600" stroke="#26303c"/>',
+              text(552, 163, "$ whoami", 13, GREEN),
+              text(552, 211, config["name"].upper(), 27),
+              text(552, 240, "@"+config["username"], 15, MUTED),
+              text(552, 285, "Build. Learn. Repeat.", 17, GREEN),
+              '<path d="M552 308H866" stroke="#26303c"/>']
     for i, (key, value) in enumerate(config["info"]):
-        parts += [f'<g class="reveal" style="animation-delay:{.5+i*.16}s">', text(407, 253+i*30, key, 13, "#79c0ff"), text(480, 253+i*30, value, 13), '</g>']
-    parts += [text(407, 395, "$ explore --projects", 12, MUTED),
-              '<rect class="reveal" style="animation-delay:1.6s" x="582" y="384" width="8" height="13" fill="#a3e635"/>',
-              text(30, 427, "IDENTITY / 01", 10, MUTED), text(865, 427, "ALWAYS A WORK IN PROGRESS", 10, MUTED, 'text-anchor="end"')]
+        parts += [f'<g class="reveal" style="animation-delay:{.5+i*.16}s">', text(552, 340+i*42, key, 10, "#79c0ff"), text(552, 357+i*42, value, 12), '</g>']
+    parts += [text(552, 545, "$ explore --projects", 12, MUTED),
+              '<rect class="reveal" style="animation-delay:1.9s" x="727" y="534" width="8" height="13" fill="#a3e635"/>',
+              text(30, 627, "IDENTITY / 01", 10, MUTED), text(865, 627, "ALWAYS A WORK IN PROGRESS", 10, MUTED, 'text-anchor="end"')]
     save_svg("identity.svg", parts)
+    full = frame(800, 800, f"{config['name']}: detailed 144-column ASCII avatar")
+    full += portrait_lines(rows, 24, 20, 752)
+    save_svg("avatar.svg", full)
 
 
 def heatmap(data):

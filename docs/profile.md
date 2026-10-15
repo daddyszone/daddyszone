@@ -4,7 +4,7 @@ The root README is the GitHub profile for `daddyszone`. It embeds two self-conta
 
 ## Edit your details
 
-Edit `data/profile/profile.json`, then run `python scripts/profile/generate.py`. Commit the configuration and generated SVGs. The portrait uses your public GitHub avatar as captured on October 15, 2026; its character rows are stored in `data/profile/portrait.json`. It stays fixed until you replace those rows.
+Edit `data/profile/profile.json`, then run `python scripts/profile/generate.py`. Commit the configuration and generated SVGs. The detailed portrait uses your public GitHub avatar, saved in `data/profile/avatar-source.png`. Its 144 × 88 character grid is stored in `data/profile/portrait.json`. To rebuild, install `scripts/profile/requirements-portrait.txt` and run `python scripts/profile/make_portrait.py`, then `python scripts/profile/generate.py`. The portrait rebuild runs on configuration pushes and manual workflow runs; daily scheduled updates reuse the committed portrait. The standalone `assets/profile/avatar.svg` provides a full-size view.
 
 ## Refresh the contribution calendar
 

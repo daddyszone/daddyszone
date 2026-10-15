@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="assets/profile/identity.svg" width="900" alt="Pavan Yadaw (@daddyszone) — Build. Learn. Repeat. ASCII avatar and terminal profile. Building Scope Starter with JavaScript, HTML and CSS." />
+<a href="assets/profile/avatar.svg"><img src="assets/profile/identity.svg" width="900" alt="Pavan Yadaw (@daddyszone) — Build. Learn. Repeat. ASCII avatar and terminal profile. Building Scope Starter with JavaScript, HTML and CSS." /></a>
+
+[View full-size ASCII portrait](assets/profile/avatar.svg)
 
 <br><br>
 
