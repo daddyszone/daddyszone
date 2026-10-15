@@ -1,12 +1,12 @@
 <div align="center">
 
-<a href="assets/profile/avatar.svg"><img src="assets/profile/identity.svg" width="900" alt="Pavan Yadaw (@daddyszone) — Build. Learn. Repeat. ASCII avatar and terminal profile. Building Scope Starter with JavaScript, HTML and CSS." /></a>
+<a href="assets/profile/avatar.svg"><img src="assets/profile/identity.svg" width="900" alt="Pavan Yadaw (@daddyszone) — Build. Learn. Repeat. Original profile artwork with an ASCII intro and terminal profile. Building Scope Starter with JavaScript, HTML and CSS." /></a>
 
-[View full-size ASCII portrait](assets/profile/avatar.svg)
+[View full-size animated portrait](assets/profile/avatar.svg)
 
 <br><br>
 
-<img src="assets/profile/contributions.svg" width="900" alt="My GitHub contribution calendar, refreshed daily." />
+<img src="assets/profile/contributions.svg" width="900" alt="Decorative all-green animated calendar with real GitHub contribution totals, refreshed daily." />
 
 <br><br>
 

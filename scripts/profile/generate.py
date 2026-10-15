@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 from datetime import date, datetime, timedelta, timezone
 from html import escape
 from html.parser import HTMLParser
@@ -98,16 +99,37 @@ def portrait_lines(rows, x, y, size):
     return parts
 
 
+def faithful_portrait(rows, x, y, size):
+    """Keep the actual artwork intact; ASCII is only the introductory transition."""
+    original = base64.b64encode((DATA / "avatar-source.png").read_bytes()).decode("ascii")
+    parts = ['''<style>
+      .portrait-original{animation:portrait-resolve 2.8s ease-in-out both}
+      .portrait-ascii{opacity:0;animation:ascii-intro 2.8s ease-in-out both}
+      .portrait-scan{opacity:0;animation:portrait-scan 2.8s ease-in-out both}
+      @keyframes portrait-resolve{0%,28%{opacity:0}100%{opacity:1}}
+      @keyframes ascii-intro{0%,30%{opacity:1}100%{opacity:0}}
+      @keyframes portrait-scan{0%,24%{opacity:0;transform:translateY(0)}35%{opacity:.65}90%{opacity:.5}100%{opacity:0;transform:translateY(var(--portrait-travel))}}
+      @media(prefers-reduced-motion:reduce){.portrait-original{animation:none!important;opacity:1!important}.portrait-ascii,.portrait-scan{display:none!important}}
+    </style>''',
+             '<g class="portrait-ascii">']
+    parts += portrait_lines(rows, x, y, size)
+    parts += ['</g>', f'<defs><clipPath id="portrait-clip"><rect x="{x}" y="{y}" width="{size}" height="{size}" rx="14"/></clipPath></defs>',
+              f'<g clip-path="url(#portrait-clip)"><image class="portrait-original" x="{x}" y="{y}" width="{size}" height="{size}" preserveAspectRatio="xMidYMid meet" href="data:image/png;base64,{original}"/>',
+              f'<rect class="portrait-scan" style="--portrait-travel:{size}px" x="{x}" y="{y}" width="{size}" height="2" fill="#a3e635"/></g>',
+              f'<rect x="{x}" y="{y}" width="{size}" height="{size}" rx="14" fill="none" stroke="#30363d"/>']
+    return parts
+
+
 def hero(config):
     rows = json.loads((DATA / "portrait.json").read_text(encoding="utf-8"))
-    parts = frame(900, 650, f"{config['name']} — @{config['username']}. Detailed animated ASCII avatar and profile card.")
+    parts = frame(900, 650, f"{config['name']} — @{config['username']}. Original profile artwork with an animated ASCII introduction.")
     for x, color in [(26, "#ff5f57"), (44, "#febc2e"), (62, "#28c840")]:
         parts.append(f'<circle cx="{x}" cy="25" r="5" fill="{color}"/>')
     parts += [text(85, 30, f"{config['username']} / personal terminal", 12, MUTED),
-              text(864, 30, "v1.1", 11, MUTED, 'text-anchor="end"'),
+              text(864, 30, "v1.2", 11, MUTED, 'text-anchor="end"'),
               '<path d="M1 49H899" stroke="#30363d"/>',
-              text(30, 82, "$ cat avatar.ascii --detail", 12, GREEN)]
-    parts += portrait_lines(rows, 25, 111, 480)
+              text(30, 82, "$ render avatar --original", 12, GREEN)]
+    parts += faithful_portrait(rows, 25, 111, 480)
     parts += ['<path d="M529 98V600" stroke="#26303c"/>',
               text(552, 163, "$ whoami", 13, GREEN),
               text(552, 211, config["name"].upper(), 27),
@@ -120,8 +142,8 @@ def hero(config):
               '<rect class="reveal" style="animation-delay:1.9s" x="727" y="534" width="8" height="13" fill="#a3e635"/>',
               text(30, 627, "IDENTITY / 01", 10, MUTED), text(865, 627, "ALWAYS A WORK IN PROGRESS", 10, MUTED, 'text-anchor="end"')]
     save_svg("identity.svg", parts)
-    full = frame(800, 800, f"{config['name']}: detailed 144-column ASCII avatar")
-    full += portrait_lines(rows, 24, 20, 752)
+    full = frame(800, 800, f"{config['name']}: original profile artwork with ASCII intro")
+    full += faithful_portrait(rows, 24, 20, 752)
     save_svg("avatar.svg", full)
 
 
@@ -130,7 +152,7 @@ def heatmap(data):
     total = sum(day["count"] for day in days)
     active = sum(day["count"] > 0 for day in days)
     best = max(day["count"] for day in days)
-    parts = frame(900, 348, f"@{data['username']}: {total} contributions across {len(days)} displayed days; {active} active days.")
+    parts = frame(900, 348, f"Decorative all-green calendar for @{data['username']}. Colors do not encode activity. Real totals: {total} contributions; {active} active days.")
     parts += ['''<defs>
       <linearGradient id="beam"><stop stop-color="#a3e635" stop-opacity="0"/><stop offset=".94" stop-color="#a3e635" stop-opacity=".10"/><stop offset="1" stop-color="#d9f99d" stop-opacity=".65"/></linearGradient>
       <linearGradient id="trace"><stop stop-color="#79c0ff"/><stop offset=".5" stop-color="#a3e635"/><stop offset="1" stop-color="#c084fc"/></linearGradient>
@@ -147,7 +169,7 @@ def heatmap(data):
       .boot{animation:boot .8s both;animation-delay:2s}
       .cursor{animation:signal 2.4s ease-in-out infinite}
       @keyframes assemble{0%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(-100deg) scale(.12)}70%{opacity:1;transform:translate(0,0) rotate(6deg) scale(1.2)}100%{opacity:1;transform:none}}
-      @keyframes ripple{0%,8%,100%{transform:none}3%{transform:translateY(-3px) scale(1.16)}}
+      @keyframes ripple{0%,8%,100%{transform:none;fill:#238636}3%{transform:translateY(-3px) scale(1.16);fill:#a3e635}40%{fill:#39d353}70%{fill:#2ea043}}
       @keyframes halo{0%{opacity:.65;transform:scale(1)}65%,100%{opacity:0;transform:scale(2.1)}}
       @keyframes scan{0%{opacity:0;transform:translateX(-110px)}8%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translateX(820px)}}
       @keyframes trace{to{stroke-dashoffset:-2460}}
@@ -160,9 +182,9 @@ def heatmap(data):
     <path d="M30 69H870" stroke="#26303c"/>
     <circle class="signal" cx="35" cy="33" r="4" fill="#a3e635"/>
     ''', text(49, 37, "CONTRIBUTION // MATRIX", 13, GREEN),
-              text(30, 57, "$ git log --last-year --animate", 11, MUTED),
+              text(30, 57, "$ render calendar --all-green --animate", 11, MUTED),
               text(870, 36, "ACTIVITY / 02", 10, MUTED, 'text-anchor="end"'),
-              text(870, 56, "REAL ACTIVITY. REAL PROGRESS.", 9, MUTED, 'text-anchor="end"')]
+              text(870, 56, "DECORATIVE GRID / REAL TOTALS", 9, MUTED, 'text-anchor="end"')]
     first = date.fromisoformat(days[0]["date"])
     start = first - timedelta(days=(first.weekday()+1) % 7)
     previous_month = None
@@ -177,21 +199,18 @@ def heatmap(data):
         dx = ((col*17 + row*7) % 49)-24
         dy = -22 - ((col*7 + row*11) % 35)
         parts.append(f'<g class="cell-enter" style="--delay:{delay:.3f}s;--dx:{dx}px;--dy:{dy}px">')
-        parts.append(f'<rect class="cell-wave" data-date="{item["date"]}" style="--wave:{3+col*.11+row*.07:.3f}s" x="{x}" y="{y}" width="11" height="11" rx="3" fill="{PALETTE[item["level"]]}"><title>{item["date"]}: {item["count"]} contributions</title></rect>')
-        if item["count"]:
-            parts.append(f'<rect class="active-halo" style="--wave:{3+col*.11+row*.07:.3f}s" x="{x}" y="{y}" width="11" height="11" rx="3" fill="none" stroke="{PALETTE[item["level"]]}" stroke-width=".8"/>')
+        parts.append(f'<rect class="cell-wave" data-date="{item["date"]}" style="--wave:{3+col*.11+row*.07:.3f}s" x="{x}" y="{y}" width="11" height="11" rx="3" fill="#238636"><title>{item["date"]}: {item["count"]} actual contributions; decorative green color</title></rect>')
+        parts.append(f'<rect class="active-halo" style="--wave:{3+col*.11+row*.07:.3f}s" x="{x}" y="{y}" width="11" height="11" rx="3" fill="none" stroke="#39d353" stroke-width=".6"/>')
         parts.append('</g>')
     parts += ['<g clip-path="url(#grid-window)"><rect class="scan" x="58" y="113" width="100" height="111" fill="url(#beam)"/></g>']
     for row, label in [(1, "Mon"), (3, "Wed"), (5, "Fri")]:
         parts.append(text(29, 128+row*15, label, 9, MUTED))
     parts += ['<path d="M30 246H870" stroke="#26303c"/>', '<g class="boot">',
-              text(35, 278, f"{total:,}", 25, GREEN), text(35, 298, "CONTRIBUTIONS", 9, MUTED),
+              text(35, 278, f"{total:,}", 25, GREEN), text(35, 298, "REAL CONTRIBUTIONS", 9, MUTED),
               text(262, 278, active, 25, "#79c0ff"), text(262, 298, "ACTIVE DAYS", 9, MUTED),
               text(458, 278, best, 25, "#c084fc"), text(458, 298, "BEST DAY", 9, MUTED),
-              '</g>', text(687, 276, "Less", 9, MUTED)]
-    for i, color in enumerate(PALETTE):
-        parts.append(f'<rect x="{718+i*16}" y="266" width="11" height="11" rx="3" fill="{color}"/>')
-    parts += [text(806, 276, "More", 9, MUTED), text(687, 297, "PUBLIC GITHUB ACTIVITY", 9, MUTED),
+              '</g>', text(660, 276, "ALL-GREEN ANIMATION", 11, GREEN)]
+    parts += [text(660, 297, "COLORS ARE DECORATIVE", 9, MUTED),
               text(30, 331, f"{days[0]['date']} / {days[-1]['date']}", 10, MUTED),
               '<rect class="cursor" x="235" y="323" width="6" height="9" fill="#a3e635"/>',
               text(870, 331, "SYNCED " + data["updated"], 10, MUTED, 'text-anchor="end"')]
