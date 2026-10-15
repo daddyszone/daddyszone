@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="650" viewBox="0 0 900 650" role="img" aria-labelledby="title">
-<title id="title">Pavan Yadaw — @daddyszone. Original profile artwork with an animated ASCII introduction.</title>
+<title id="title">Pavan Yadaw - @daddyszone. Original profile artwork with an animated ASCII introduction.</title>
 <style>text{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.reveal{animation:reveal .6s both}@keyframes reveal{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.reveal{animation:none!important}}</style>
 <rect x=".5" y=".5" width="899" height="649" rx="18" fill="#0d1117" stroke="#30363d"/>
 <circle cx="26" cy="25" r="5" fill="#ff5f57"/>
