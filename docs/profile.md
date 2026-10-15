@@ -14,7 +14,7 @@ The **Update profile art** workflow runs daily at 06:17 UTC (11:47 AM India time
 
 The figures match the public GitHub contribution calendar, including any anonymized private contribution counts that you have chosen to display. No private repository names or activity are fetched.
 
-Animations play once on image load and respect reduced-motion preferences. Without animation support, the final artwork is visible. GitHub or browser image caching can delay a refresh.
+The portrait reveals once on image load. The contribution calendar assembles with a staggered entrance, followed by a looping grid wave, scanning beam, active-day pulse rings, and a moving border highlight. Counts and level colors always come from the real calendar; decorative effects add no activity. Reduced-motion preferences disable all calendar animation and hide decorative moving overlays, leaving the complete static chart visible. Without animation support, the final artwork is visible. GitHub or browser image caching can delay a refresh.
 
 Design approach inspired by [Avi Vashishta's animated README guide](https://www.avivashishta.com/blog/build-animated-github-profile-readme); the generator and artwork here are original implementations.
 

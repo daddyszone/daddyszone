@@ -130,30 +130,71 @@ def heatmap(data):
     total = sum(day["count"] for day in days)
     active = sum(day["count"] > 0 for day in days)
     best = max(day["count"] for day in days)
-    parts = frame(900, 276, f"@{data['username']}: {total} contributions across {len(days)} displayed days; {active} active days.")
-    parts += [text(30, 35, "$ git log --last-year", 14, GREEN),
-              text(870, 35, "ACTIVITY / 02", 10, MUTED, 'text-anchor="end"'),
-              '<path d="M30 51H870" stroke="#26303c"/>']
+    parts = frame(900, 348, f"@{data['username']}: {total} contributions across {len(days)} displayed days; {active} active days.")
+    parts += ['''<defs>
+      <linearGradient id="beam"><stop stop-color="#a3e635" stop-opacity="0"/><stop offset=".94" stop-color="#a3e635" stop-opacity=".10"/><stop offset="1" stop-color="#d9f99d" stop-opacity=".65"/></linearGradient>
+      <linearGradient id="trace"><stop stop-color="#79c0ff"/><stop offset=".5" stop-color="#a3e635"/><stop offset="1" stop-color="#c084fc"/></linearGradient>
+      <radialGradient id="ambient"><stop stop-color="#23432b" stop-opacity=".35"/><stop offset="1" stop-color="#0d1117" stop-opacity="0"/></radialGradient>
+      <clipPath id="grid-window"><rect x="58" y="113" width="797" height="111" rx="6"/></clipPath>
+    </defs>
+    <style>
+      .cell-enter{transform-box:fill-box;transform-origin:center;animation:assemble .85s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--delay)}
+      .cell-wave{transform-box:fill-box;transform-origin:center;animation:ripple 9s ease-in-out infinite;animation-delay:var(--wave)}
+      .active-halo{transform-box:fill-box;transform-origin:center;animation:halo 3.6s ease-out infinite;animation-delay:var(--wave);pointer-events:none}
+      .scan{animation:scan 9s linear infinite;animation-delay:2.7s;opacity:0;pointer-events:none}
+      .border-trace{stroke-dasharray:100 2360;animation:trace 13s linear infinite;pointer-events:none}
+      .signal{animation:signal 3.6s ease-in-out infinite}
+      .boot{animation:boot .8s both;animation-delay:2s}
+      .cursor{animation:signal 2.4s ease-in-out infinite}
+      @keyframes assemble{0%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(-100deg) scale(.12)}70%{opacity:1;transform:translate(0,0) rotate(6deg) scale(1.2)}100%{opacity:1;transform:none}}
+      @keyframes ripple{0%,8%,100%{transform:none}3%{transform:translateY(-3px) scale(1.16)}}
+      @keyframes halo{0%{opacity:.65;transform:scale(1)}65%,100%{opacity:0;transform:scale(2.1)}}
+      @keyframes scan{0%{opacity:0;transform:translateX(-110px)}8%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translateX(820px)}}
+      @keyframes trace{to{stroke-dashoffset:-2460}}
+      @keyframes signal{0%,100%{opacity:.4}50%{opacity:1}}
+      @keyframes boot{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+      @media(prefers-reduced-motion:reduce){.cell-enter,.cell-wave,.boot,.signal,.cursor{animation:none!important;transform:none!important;opacity:1!important}.scan,.active-halo,.border-trace{display:none!important}}
+    </style>
+    <ellipse cx="650" cy="156" rx="290" ry="155" fill="url(#ambient)"/>
+    <rect class="border-trace" x="2" y="2" width="896" height="344" rx="17" fill="none" stroke="url(#trace)" stroke-width="2"/>
+    <path d="M30 69H870" stroke="#26303c"/>
+    <circle class="signal" cx="35" cy="33" r="4" fill="#a3e635"/>
+    ''', text(49, 37, "CONTRIBUTION // MATRIX", 13, GREEN),
+              text(30, 57, "$ git log --last-year --animate", 11, MUTED),
+              text(870, 36, "ACTIVITY / 02", 10, MUTED, 'text-anchor="end"'),
+              text(870, 56, "REAL ACTIVITY. REAL PROGRESS.", 9, MUTED, 'text-anchor="end"')]
     first = date.fromisoformat(days[0]["date"])
     start = first - timedelta(days=(first.weekday()+1) % 7)
     previous_month = None
     for item in days:
         day = date.fromisoformat(item["date"])
         col, row = divmod((day-start).days, 7)
-        x, y = 62 + col*15, 88 + row*15
+        x, y = 62 + col*15, 119 + row*15
         if day.month != previous_month and day.day <= 7 and col < 51:
-            parts.append(text(x, 76, day.strftime("%b"), 10, MUTED))
+            parts.append(text(x, 103, day.strftime("%b"), 10, MUTED))
             previous_month = day.month
-        parts.append(f'<rect class="reveal" style="animation-delay:{col*.016+row*.025:.3f}s" x="{x}" y="{y}" width="11" height="11" rx="3" fill="{PALETTE[item["level"]]}"><title>{item["date"]}: {item["count"]} contributions</title></rect>')
+        delay = col*.035 + row*.065
+        dx = ((col*17 + row*7) % 49)-24
+        dy = -22 - ((col*7 + row*11) % 35)
+        parts.append(f'<g class="cell-enter" style="--delay:{delay:.3f}s;--dx:{dx}px;--dy:{dy}px">')
+        parts.append(f'<rect class="cell-wave" data-date="{item["date"]}" style="--wave:{3+col*.11+row*.07:.3f}s" x="{x}" y="{y}" width="11" height="11" rx="3" fill="{PALETTE[item["level"]]}"><title>{item["date"]}: {item["count"]} contributions</title></rect>')
+        if item["count"]:
+            parts.append(f'<rect class="active-halo" style="--wave:{3+col*.11+row*.07:.3f}s" x="{x}" y="{y}" width="11" height="11" rx="3" fill="none" stroke="{PALETTE[item["level"]]}" stroke-width=".8"/>')
+        parts.append('</g>')
+    parts += ['<g clip-path="url(#grid-window)"><rect class="scan" x="58" y="113" width="100" height="111" fill="url(#beam)"/></g>']
     for row, label in [(1, "Mon"), (3, "Wed"), (5, "Fri")]:
-        parts.append(text(29, 97+row*15, label, 9, MUTED))
-    parts += [text(62, 216, f"{total:,}", 19, GREEN), text(113, 216, "contributions", 11, MUTED),
-              text(298, 216, f"{active} active days", 12), text(488, 216, f"{best} best day", 12), text(699, 216, "Less", 9, MUTED)]
+        parts.append(text(29, 128+row*15, label, 9, MUTED))
+    parts += ['<path d="M30 246H870" stroke="#26303c"/>', '<g class="boot">',
+              text(35, 278, f"{total:,}", 25, GREEN), text(35, 298, "CONTRIBUTIONS", 9, MUTED),
+              text(262, 278, active, 25, "#79c0ff"), text(262, 298, "ACTIVE DAYS", 9, MUTED),
+              text(458, 278, best, 25, "#c084fc"), text(458, 298, "BEST DAY", 9, MUTED),
+              '</g>', text(687, 276, "Less", 9, MUTED)]
     for i, color in enumerate(PALETTE):
-        parts.append(f'<rect x="{730+i*16}" y="206" width="11" height="11" rx="3" fill="{color}"/>')
-    parts += [text(818, 216, "More", 9, MUTED),
-              text(30, 253, f"{days[0]['date']} / {days[-1]['date']}  |  GitHub contribution calendar", 10, MUTED),
-              text(870, 253, "Updated " + data["updated"], 10, MUTED, 'text-anchor="end"')]
+        parts.append(f'<rect x="{718+i*16}" y="266" width="11" height="11" rx="3" fill="{color}"/>')
+    parts += [text(806, 276, "More", 9, MUTED), text(687, 297, "PUBLIC GITHUB ACTIVITY", 9, MUTED),
+              text(30, 331, f"{days[0]['date']} / {days[-1]['date']}", 10, MUTED),
+              '<rect class="cursor" x="235" y="323" width="6" height="9" fill="#a3e635"/>',
+              text(870, 331, "SYNCED " + data["updated"], 10, MUTED, 'text-anchor="end"')]
     save_svg("contributions.svg", parts)
 
 
