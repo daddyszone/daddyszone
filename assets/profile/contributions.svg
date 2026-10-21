@@ -1515,6 +1515,10 @@
 <rect class="cell-wave" data-date="2026-10-20" style="--wave:8.860s" x="842" y="149" width="11" height="11" rx="3" fill="#238636"><title>2026-10-20: 0 actual contributions; decorative green color</title></rect>
 <rect class="active-halo" style="--wave:8.860s" x="842" y="149" width="11" height="11" rx="3" fill="none" stroke="#39d353" stroke-width=".6"/>
 </g>
+<g class="cell-enter" style="--delay:2.015s;--dx:-1px;--dy:-34px">
+<rect class="cell-wave" data-date="2026-10-21" style="--wave:8.930s" x="842" y="164" width="11" height="11" rx="3" fill="#238636"><title>2026-10-21: 0 actual contributions; decorative green color</title></rect>
+<rect class="active-halo" style="--wave:8.930s" x="842" y="164" width="11" height="11" rx="3" fill="none" stroke="#39d353" stroke-width=".6"/>
+</g>
 <g clip-path="url(#grid-window)"><rect class="scan" x="58" y="113" width="100" height="111" fill="url(#beam)"/></g>
 <text x="29" y="143" font-size="9" fill="#8b949e" >Mon</text>
 <text x="29" y="173" font-size="9" fill="#8b949e" >Wed</text>
@@ -1530,7 +1534,7 @@
 </g>
 <text x="660" y="276" font-size="11" fill="#a3e635" >ALL-GREEN ANIMATION</text>
 <text x="660" y="297" font-size="9" fill="#8b949e" >COLORS ARE DECORATIVE</text>
-<text x="30" y="331" font-size="10" fill="#8b949e" >2025-10-19 / 2026-10-20</text>
+<text x="30" y="331" font-size="10" fill="#8b949e" >2025-10-19 / 2026-10-21</text>
 <rect class="cursor" x="235" y="323" width="6" height="9" fill="#a3e635"/>
-<text x="870" y="331" font-size="10" fill="#8b949e" text-anchor="end">SYNCED 2026-10-20</text>
+<text x="870" y="331" font-size="10" fill="#8b949e" text-anchor="end">SYNCED 2026-10-21</text>
 </svg>
